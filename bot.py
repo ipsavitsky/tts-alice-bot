@@ -1,16 +1,18 @@
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
-from configparser import ConfigParser
+from dotenv import load_dotenv
 from speech import synthesize
 from iamtoken import gettoken
+import os
 import io
 
-params = ConfigParser()
-params.read('config.cfg')
+# params = ConfigParser()
+# params.read('config.cfg')
+load_dotenv()
 
-bot = AsyncTeleBot(params['TELEGRAM']['API_KEY'])
+bot = AsyncTeleBot(os.getenv('TELEGRAM_API_KEY'))
 
-iamtoken = gettoken(params['YANDEX']['OAUTH_TOKEN'])
+iamtoken = gettoken(os.getenv('YANDEX_OAUTH_TOKEN'))
 
 @bot.message_handler(commands=['start', 'help'])
 async def start_bot(message):
@@ -21,7 +23,7 @@ async def on_message(message):
     await bot.send_message(message.chat.id, "Записываю голосовую...")
     strm = io.BytesIO()
     
-    for content in synthesize(params['YANDEX']['FOLDER_ID'], iamtoken, message.text):
+    for content in synthesize(os.getenv('YANDEX_FOLDER_ID'), iamtoken, message.text):
         strm.write(content)
     await bot.send_voice(message.chat.id, strm.getbuffer())
 
@@ -32,7 +34,7 @@ async def polling():
     while True:
         await asyncio.sleep(3600)
         # print("switching token...")
-        iamtoken = gettoken(params['YANDEX']['OAUTH_TOKEN'])
+        iamtoken = gettoken(os.getenv('YANDEX_OAUTH_TOKEN'))
 
 async def main():
     await asyncio.gather(bot.infinity_polling(), polling())

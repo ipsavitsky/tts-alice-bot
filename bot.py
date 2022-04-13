@@ -23,7 +23,7 @@ async def start_bot(message):
 
 
 @bot.message_handler(commands=['help'])
-async def help(message):
+async def on_help(message):
     await bot.send_message(message.chat.id, "Just send me something and I will pronounce it.")
 
 
